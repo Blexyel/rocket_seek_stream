@@ -67,7 +67,7 @@ impl<'a> SeekStream<'a> {
         };
         let len = block_on(file.metadata()).unwrap().len();
 
-        Ok(Self::with_opts(file, len, None))
+        Ok(Self::with_opts(file, len, "application/octet-stream"))
     }
 }
 
@@ -187,12 +187,8 @@ impl<'r> Responder<'r, 'static> for SeekStream<'r> {
 
             // Stream multipart/bytes if multiple ranges have been requested
             if ranges.len() > 1 {
-                let rd = MultipartReader::new(
-                    self.stream.into_inner(),
-                    stream_len,
-                    mime_type,
-                    ranges,
-                );
+                let rd =
+                    MultipartReader::new(self.stream.into_inner(), stream_len, mime_type, ranges);
 
                 resp.set_raw_header(
                     "Content-Type",

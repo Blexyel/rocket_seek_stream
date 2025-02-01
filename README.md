@@ -1,3 +1,6 @@
+> [!note]  
+> Modified to fit my personal needs. Not recommended for use!
+
 # rocket_seek_stream
 
 [crates.io](https://crates.io/crates/rocket_seek_stream)
