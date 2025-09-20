@@ -27,14 +27,14 @@ fn infer_mime_type(prelude: &[u8]) -> &'static str {
 /// The Accept Ranges header will always be set.
 /// If a range request is received, it will respond with the requested offset.
 /// Multipart range requests are also supported.
-pub struct SeekStream<'a> {
+pub struct SeekStream {
     stream: RefCell<Pin<Box<dyn ReadSeek>>>,
     length: Option<u64>,
-    content_type: Option<&'a str>,
+    content_type: Option<String>,
 }
 
-impl<'a> SeekStream<'a> {
-    pub fn new<T>(s: T) -> SeekStream<'a>
+impl<'a> SeekStream {
+    pub fn new<T>(s: T) -> SeekStream
     where
         T: AsyncRead + AsyncSeek + Send + 'static,
     {
@@ -44,8 +44,8 @@ impl<'a> SeekStream<'a> {
     pub fn with_opts<T>(
         stream: T,
         stream_len: impl Into<Option<u64>>,
-        content_type: impl Into<Option<&'a str>>,
-    ) -> SeekStream<'a>
+        content_type: impl Into<Option<String>>,
+    ) -> SeekStream
     where
         T: AsyncRead + AsyncSeek + Send + 'static,
     {
@@ -104,7 +104,7 @@ fn range_header_parts(header: &range_header::ByteRange) -> (Option<u64>, Option<
 }
 
 #[rocket::async_trait]
-impl<'r> Responder<'r, 'static> for SeekStream<'r> {
+impl<'r> Responder<'r, 'static> for SeekStream {
     fn respond_to(self, req: &'r rocket::Request) -> response::Result<'static> {
         use rocket::http::Status;
         use std::io::SeekFrom;
@@ -136,8 +136,8 @@ impl<'r> Responder<'r, 'static> for SeekStream<'r> {
 
         // Get the mime type, either by inferring it from the stream
         // Or the optional value set in the struct
-        let mime_type = match self.content_type {
-            Some(x) => String::from(x),
+        let mime_type: String = match self.content_type {
+            Some(ref x) => x.clone(),
             None => {
                 // Infer the mime type of the stream by taking at most a 256 byte sample from the beginning
                 // And passing it to the infer_mime_type function
