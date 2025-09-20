@@ -58,7 +58,7 @@ impl<'a> SeekStream<'a> {
 
     /// Serve content from a file path. The mime type will be inferred by taking a sample from
     /// The beginning of the stream.
-    pub fn from_path<T: AsRef<Path>>(p: T, t: &'a str) -> std::io::Result<Self> {
+    pub fn from_path<T: AsRef<Path>>(p: T, t: String) -> std::io::Result<Self> {
         let handle = Handle::current();
         handle.enter();
         let file = match block_on(rocket::tokio::fs::File::open(p.as_ref())) {
